@@ -25,8 +25,8 @@ from sklearn.svm import LinearSVC
 from sklearn.metrics import f1_score, precision_score, recall_score 
 
 # dataset
-movies = np.load("/NAS/home01/sapumal/amazon/npy/movies.npy")
-books = np.load("/NAS/home01/sapumal/amazon/npy/books.npy")
+movies = np.load("npy/movies.npy")
+books = np.load("npy/books.npy")
 
 test_users = 3500
 
@@ -56,18 +56,9 @@ batch_size = 128
 epochs = 40
 decay = 1e-4 
 bias = True
-alpha = 1 
-beta = 2
-gama = 1
-hadamard = 0  
+hadamard = 10  
 
-ecount = 0
-
-print("HADAMARD", hadamard)
-
-print("updated 1 step") 
-print("tanh", "adam")
-print("params", batch_size, epochs, decay, alpha, beta, gama, hadamard)
+print("params", batch_size, epochs, decay, hadamard)
 
 print("books: ", books.shape[0], books.shape[1])
 print("movie: ", movies.shape[0], movies.shape[1])
@@ -179,7 +170,6 @@ class Histories(Callback):
     def on_epoch_end(self, epoch, logs={}):
         print("predictions starting")
         predictions_i = vae_prediction.predict([movies2], batch_size=batch_size)
-        print("predictions done")
         
         user_ranks = list()
 
@@ -211,8 +201,6 @@ class Histories(Callback):
             rank = len(rank) #+ 1
             user_ranks.append(rank)
         
-            #print("user id: ", user, rank, comp_value)
-        
         evranks = [5, 10, 20, 50]        
         for rank in evranks:
         
@@ -241,11 +229,6 @@ def custom_crossentropy(inputs, outputs, hadamard):
     outputs = outputs*inputs
     e2 = K.mean(K.binary_crossentropy(inputs, outputs), axis=-1) 
     return (e1 + hadamard*e2) 
-
-def hadamard_squared_error(y_true, y_pred):
-    print("hadamard value:", hadamard)
-    B = y_true * (hadamard - 1) + 1
-    return K.mean(tf.multiply(K.square(y_pred - y_true), B), axis=-1)
 
 if __name__ == '__main__':
 
